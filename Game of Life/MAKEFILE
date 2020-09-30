@@ -1,4 +1,0 @@
-CC=gcc -o
-LD=gcc
-
-CFLAGS= -Wall
