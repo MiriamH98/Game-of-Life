@@ -18,10 +18,14 @@ void gl_check_error(const char* error_text)
 void DrawMatrix(GLFWwindow* window)
 {
     //Grundfarbe des Hintergrundes 
-    glClearColor(1.0f,1.0f, 1.0f,0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     gl_check_error("glClearColor");
     glClear(GL_COLOR_BUFFER_BIT);
 
-    //vao, vbo
+    glad_glBindVertexArray(vao)
+    glad_glDrawArrays(GL_TRIANGLES, 0, int32_t(len(triangle)/3))
+
 }
+
+
 

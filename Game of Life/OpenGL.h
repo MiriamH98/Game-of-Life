@@ -15,6 +15,8 @@ typedef struct
     GLuint vbo;
 } user_data_t;
 
+
+
 //Fehlererkennung
 void gl_check_error(const char* error_text);
 

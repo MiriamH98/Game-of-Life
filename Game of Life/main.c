@@ -183,6 +183,91 @@ int SEof(int x, int y, int Matrix[xdim][ydim], bool bottomedge, bool rightedge)
     }
 }
 
+float triangle[]
+{
+     0,      0.5,      0,
+    -0.5,   -0.5,      0,
+     0.5,   -0.5,      0,
+
+}
+
+float square[]
+{
+    -0.5, 0.5, 0,
+    -0.5, -0.5, 0,
+    0.5, -0.5, 0,
+
+    -0.5, 0.5, 0,
+    0.5, 0.5, 0,
+    0.5, -0.5, 0,
+}
+
+struct cell
+{
+    uint32_t drawable;
+    int x, y;
+}
+
+int makeCells() [][]*cell
+{
+    cell := make([][]*cell, xdim, xdim)
+    for ( x = 0; x < xdim; x++)
+    {
+        for ( y = 0; y < ydim; y++)
+        {
+            c:= newCell(x,y)
+            cells[x] = append(cells[x], c)
+        }
+        
+    }
+    return cells
+
+}
+
+//Vao, Vbo
+int makevao(float points)
+{
+    uint32_t vbo;
+    glad_glGenBuffers(1, &vbo)
+    glad_glBindBuffer(GL_ARRAY_BUFFER, vbo)
+    glad_glBufferData(GL_ARRAY_BUFFER, 4*len(points), gl.Ptr(points), GL_STATIC_DRAW)
+
+    uint32_t vao;
+    glad_glGenVertexArrays(1, vao)
+    glad_glBindVertexArray(vao)
+    glad_glEnableVertexAttribArray(0)
+    glad_glBindBuffer(GL_ARRAY_BUFFER, vbo)
+    glad_glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, NULL)
+
+    return vao
+    
+}
+
+/*int compileShader(string source, uint32_t ShaderType, uint32_t error)
+{
+    shader:= glad_glCreateShader(ShaderType)
+    csources, free := gl_Strs(source)
+    glad_glShaderSource(shader, 1, csources, NULL)
+    free()
+    glad_glCompileShader(shader)
+
+    uint32_t status
+    glad_glGetShaderiv(shader, GL_COMPILE_STATUS, &status)
+    if status == GL_FALSE
+    {
+        int32_t LogLength
+        glad_glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &LogLength)
+
+        //TODO import strings, ftm, shader im Makefile kompilieren
+        Log := Strings_Reapeat("\x00", int(LogLength+1))
+        glad_glGetShaderInfoLog(shader, LogLength, NULL, gl_Strs(Log))
+
+        return 0, ftm_Errorf("Failed to compile %v: %v", source, Log)
+    }
+    
+    return shader, NULL
+}
+*/
 int main()
 {
     //2 Matrizen zum gegenseitigen Überschreiben und beibehalten der alten Werte für bestimmte Zeit
@@ -291,6 +376,8 @@ Array2D *currentMatrix = &LifeMatrix1;
     //Create window
     GLFWwindow* window;
 
+    vao:= makevao(triangle)
+
     //Initialize library
     if(!glfwInit())
         printf("Failed to initialize GLFW");
@@ -315,7 +402,7 @@ Array2D *currentMatrix = &LifeMatrix1;
 
     while(!glfwWindowShouldClose(window))
     {
-        DrawMatrix(window);
+        DrawMatrix(vao, window);
         
         // Swap the buffers to avoid tearing:
         glfwSwapBuffers(window);
@@ -324,6 +411,8 @@ Array2D *currentMatrix = &LifeMatrix1;
     glfwDestroyWindow(window);
     glfwTerminate();
    
+   glad_glAttachShader(GL_VERTEX_SHADER)
+   glad_glAttachShader(GL_FRAGMENT_SHADER)
 
 return 0;
 }
