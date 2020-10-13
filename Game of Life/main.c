@@ -201,7 +201,7 @@ bool SEof(int x, int y, struct cell Matrix[xdim][ydim], bool bottomedge, bool ri
 /*
 float square[]=
 {
-    0.0f,  1.0f, 0.0f,  //NW
+    0.0f, 1.0f 0.0f,  //NW
     0.0f, 0.0f, 0.0f,   //SW
     1.0f, 0.0f, 0.0f,   //SO
 
@@ -209,14 +209,69 @@ float square[]=
     1.0f,  1.0f, 0.0f,  //NO
     1.0f, 0.0f, 0.0f,   //SO
 };
+    for i := 0; i < len(points); i++ {
+        var position float32
+        var size float32
+        switch i % 3 {
+        case 0:
+                //size = 1.0 / float32(columns)
+                position = float32(x) * size
+        case 1:
+                //size = 1.0 / float32(rows)
+                position = float32(y) * size
+        default:
+                continue
+        }
+
+        if points[i] < 0 {
+                points[i] = (position * 2) - 1
+        } else {
+                points[i] = ((position + size) * 2) - 1
+        }
+    }
 */
-void CalcSquareCoord(user_data_t* user_data, int x, int y)
+void CalcSquareCoord(user_data_t* user_data, float points[18], int x, int y)
 {
+    float position = 0.0f;
     float sizex = 2.0f / (float)xdim; 
     float sizey = 2.0f / (float)ydim; 
-//0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16
-    square[]     
+    points[] = square[];
+ for (int i = 0; i < 18; i++)
+ {
+        //0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16
+    switch(i % 3)
+    {
+        case 0:
+                
+            position = (float)(x) * sizex;
+            if(points[i] > 0)
+            {
+                points[i] = (position + sizex) - 1;//1
+            }
+            else
+            {
+                points[i] = position - 1;//0
+            }
+            break;
 
+        case 1:
+                
+            position = (float)(y) * sizey;
+            if(points[i] > 0)
+            {
+                points[i] = (position + sizey) - 1;//1
+            }
+            else
+            {
+                points[i] = position - 1;//0
+            }
+            break;
+            
+        default:
+        
+            break;
+    }
+ }
 }
 
 
@@ -336,9 +391,7 @@ int main()
            
       /*  
        CalcSquareCoordinates(x, y);
-    
-    
-    */
+      */
         DrawMatrix(window, square);
         
         
