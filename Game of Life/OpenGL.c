@@ -1,106 +1,109 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "OpenGL.h"
 #include <string.h>
 
-void gl_check_error(const char* error_text)
+
+
+void GlCheckError(const char* ErrorText)
 {
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR)
+    GLenum Error = glGetError();
+    if(Error != GL_NO_ERROR)
     {
-            fprintf(stderr, "GLError: %s (%d) \n", error_text, error);
+            fprintf(stderr, "GLError: %s (%d) \n", ErrorText, Error);
             exit(EXIT_FAILURE);
     }
 }
 
-void check_error(int condition, const char* error_text)
+void CheckError(int Condition, const char* ErrorText)
 {
-	if (!condition)
+	if (!Condition)
 	{
-		fprintf(stderr, "%s\n", error_text);
+		fprintf(stderr, "%s\n", ErrorText);
 		exit(EXIT_FAILURE);
 	}
 }
 
 //Shader in String umwandeln zur Verwendung in gl-Funktion glShaderSource
-char* ReadShaderToString(const char* path)
+char* ReadShaderToString(const char* Path)
 {
     //Shader File:
-    FILE* file = fopen(path, "rb");
+    FILE* File = fopen(Path, "rb");
 
     //Pointer auf Ende für Dateigröße
-    int success = fseek(file, 0,SEEK_END);
+    int Success = fseek(File, 0,SEEK_END);
 
     //Lesen der Dateigröße
-    long size = ftell(file);
-    check_error(size >= 0, "Failed to determine file size.");
+    long Size = ftell(File);
+    CheckError(Size >= 0, "Failed to determine File size.");
 
     //Pointer zurück auf Anfang
-    rewind(file);
+    rewind(File);
 
     //Speicher für Buffer
-    char* buffer = malloc(size + 1);
-    check_error(buffer != NULL, "Failed to allocate buffer.");
+    char* Buffer = malloc(Size + 1);
+    CheckError(Buffer != NULL, "Failed to allocate buffer.");
 
     //Dateiinhalt in Buffer schreiben
-    size_t FileIntoBuffer = fread(buffer, size, 1, file);
-    check_error(FileIntoBuffer == 1, "Failed to read file.");
+    size_t FileIntoBuffer = fread(Buffer, Size, 1, File);
+    CheckError(FileIntoBuffer == 1, "Failed to read File.");
 
     //Datei schließen
-    success = fclose(file);
-    check_error(success == 0, "Failed to close file.");
+    Success = fclose(File);
+    CheckError(Success == 0, "Failed to close File.");
 
-    buffer[size] = '\0';
+    Buffer[Size] = '\0';
 
-    return buffer;
+    return Buffer;
 
 
 
 }
 
-GLuint CreateShader(GLenum type, const char* shader_path, const char* shader_tag)
+GLuint CreateShader(GLenum type, const char* ShaderPath, const char* ShaderTag)
 {
-    GLuint shader = glCreateShader(type);
-    gl_check_error("glCreateShader");
+    GLuint Shader = glCreateShader(type);
+    GlCheckError("glCreateShader");
 
-    char *ShaderSource = ReadShaderToString(shader_path);
-    glShaderSource(shader, 1, (const char**)&ShaderSource, NULL);
-    gl_check_error("GLShaderSource");
+    char *ShaderSource = ReadShaderToString(ShaderPath);
+    glShaderSource(Shader, 1, (const char**)&ShaderSource, NULL);
+    GlCheckError("GLShaderSource");
 
     free(ShaderSource);
 
-    glCompileShader(shader);
-    gl_check_error("glCompileShader");
+    glCompileShader(Shader);
+    GlCheckError("glCompileShader");
 
     // Check the compilation status:
-	GLint success;
+	GLint Success;
 
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	gl_check_error("glGetShaderiv");
+	glGetShaderiv(Shader, GL_COMPILE_STATUS, &Success);
+	GlCheckError("glGetShaderiv");
 
-	if (success)
+	if (Success)
 	{
-		return shader;
+		return Shader;
 	}
 
-	// Extract the length of the error message (including '\0'):
-	GLint info_length = 0;
+	// Extract the length of the Error message (including '\0'):
+	GLint InfoLength = 0;
 
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_length);
-	gl_check_error("glGetShaderiv");
+	glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &InfoLength);
+	GlCheckError("glGetShaderiv");
 
-	if (info_length > 1)
+	if (InfoLength > 1)
 	{
 		// Extract the message itself:
-		char* info = malloc(info_length);
-		//check_error(info != NULL, "Failed to allocate memory for error message.");
+		char* Info = malloc(InfoLength);
+		//CheckError(info != NULL, "Failed to allocate memory for Error message.");
 
-		glGetShaderInfoLog(shader, info_length, NULL, info);
-		gl_check_error("glGetShaderInfoLog");
+		glGetShaderInfoLog(Shader, InfoLength, NULL, Info);
+		GlCheckError("glGetShaderInfoLog");
 
-		fprintf(stderr, "Error compiling shader (%s): %s\n", shader_tag, info);
-		free(info);
+		fprintf(stderr, "Error compiling shader (%s): %s\n", ShaderTag, Info);
+		free(Info);
 	}
 	else
 	{
@@ -110,7 +113,7 @@ GLuint CreateShader(GLenum type, const char* shader_path, const char* shader_tag
 	exit(EXIT_FAILURE);
 }
 
-void InitShader(user_data_t* user_data)
+void InitShader(UserData_t* UserData)
 {
     //Vertex Shader erstellen
     GLuint VertexShader = CreateShader(GL_VERTEX_SHADER, "vertex.glsl", "Vertex shader");
@@ -120,126 +123,166 @@ void InitShader(user_data_t* user_data)
 
     //Shader Programm erstellen:
     GLuint ShaderProgram = glCreateProgram();
-    gl_check_error("glCreateProgram");
+    GlCheckError("glCreateProgram");
 
     //Shader an Programm heften
     glAttachShader(ShaderProgram, VertexShader);
-    gl_check_error("glAttachShader [vertex]");
+    GlCheckError("glAttachShader [vertex]");
 
     glAttachShader(ShaderProgram, FragmentShader);
-    gl_check_error("glAttachShader [fragment]");
+    GlCheckError("glAttachShader [fragment]");
 
     //Linken
     glLinkProgram(ShaderProgram);
-    gl_check_error("glLinkProgram");
+    GlCheckError("glLinkProgram");
 
     //Fehlertest:
-    int success;
-    char infolog[512];
+    int Success;
+    char InfoLog[512];
 
-    glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &success);
-    if(!success)
+    glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
+    if(!Success)
     {
-        glGetProgramInfoLog(ShaderProgram, 512, NULL, infolog);
-        printf("Error linking shader program: %s", infolog);
+        glGetProgramInfoLog(ShaderProgram, 512, NULL, InfoLog);
+        printf("Error linking shader program: %s", InfoLog);
     }
 
     glUseProgram(ShaderProgram);
-    gl_check_error("glUseProgram");
+    GlCheckError("glUseProgram");
 
-    // Detach the shaders after linking:
+    // Shader nach dem Linken vom Program entfernen:
 	glDetachShader(ShaderProgram, VertexShader);
-	gl_check_error("glDetachShader [vertex]");
+	GlCheckError("glDetachShader [vertex]");
 
 	glDetachShader(ShaderProgram, FragmentShader);
-	gl_check_error("glDetachShader [fragment]");
+	GlCheckError("glDetachShader [fragment]");
 
     glDeleteShader(VertexShader);
     glDeleteShader(FragmentShader); 
 
-    user_data->ShaderProgram = ShaderProgram;
+    UserData->ShaderProgram = ShaderProgram;
 
 
 
 }
-
-//Vao, Vbo
-void InitVao(user_data_t* user_data, float* square)
+void MakeVao(UserData_t* UserData, struct Cell Matrix[xDim][yDim])
 {
+    float Temp[18*xDim*yDim];
+    //Herauslesen von drawable Daten von Lifematrix
+    for(int x = 0; x < xDim; x++)
+    {
+        for(int y = 0; y < yDim; y++)
+        {
+            int k = 18 * (x * yDim + y);
+            
+            for(int i = 0; i < 18; i++)
+            {
+                
+                Temp[k + i] = Matrix[x][y].Drawable[i];
+               
+            }
+            
+        }
+    }   
     //Anlegen und Binden eines Vertex Buffer Objektes
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    gl_check_error("glGenBuffers");
+    GLuint Vbo;
+    glGenBuffers(1, &Vbo);
+    GlCheckError("glGenBuffers");
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    gl_check_error("glBindBuffer");
+    glBindBuffer(GL_ARRAY_BUFFER, Vbo);
+    GlCheckError("glBindBuffer");
 
-    //AUF USER DATA ANPASSEN??
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18, square, GL_STATIC_DRAW);
-    gl_check_error("glBufferData");
-
-
-    user_data->vbo = vbo;
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18 * xDim * yDim, Temp, GL_STATIC_DRAW);
+    GlCheckError("glBufferData");
 
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    gl_check_error("glGenVertexArray");
+    UserData->Vbo = Vbo;
+
+
+    GLuint Vao;
+    glGenVertexArrays(1, &Vao);
+    GlCheckError("glGenVertexArray");
     
-    glBindVertexArray(vao);
-    gl_check_error("glBindVertexArray");
+    glBindVertexArray(Vao);
+    GlCheckError("glBindVertexArray");
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), NULL);
     glEnableVertexAttribArray(0);
     
-    glBindVertexArray(vao);
+    glBindVertexArray(Vao);
     
 
-    user_data->vao = vao;
+    UserData->Vao = Vao;
 
 
 }
-
-void InitOpenGL(GLFWwindow* window, float* square)
+//Vao, Vbo Funktionen
+void InitVao(UserData_t* UserData, float* Square)
 {
-    user_data_t* user_data = glfwGetWindowUserPointer(window);
-    InitShader(user_data);
-    InitVao(user_data, square);
+    //Anlegen und Binden eines Vertex Buffer Objektes
+    GLuint Vbo;
+    glGenBuffers(1, &Vbo);
+    GlCheckError("glGenBuffers");
+
+    glBindBuffer(GL_ARRAY_BUFFER, Vbo);
+    GlCheckError("glBindBuffer");
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18, Square, GL_STATIC_DRAW);
+    GlCheckError("glBufferData");
+
+
+    UserData->Vbo = Vbo;
+
+
+    GLuint Vao;
+    glGenVertexArrays(1, &Vao);
+    GlCheckError("glGenVertexArray");
     
+    glBindVertexArray(Vao);
+    GlCheckError("glBindVertexArray");
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), NULL);
+    glEnableVertexAttribArray(0);
     
+    glBindVertexArray(Vao);
+    
+
+    UserData->Vao = Vao;
+
+
+}
+//Funktion zur Initialisierung der OpenG
+void InitOpenGL(GLFWwindow* Window, struct Cell Matrix[xDim][yDim])
+{
+    UserData_t* UserData = glfwGetWindowUserPointer(Window);
+    InitShader(UserData);
+    MakeVao(UserData, Matrix);
 }
 
-/*int makeCells() [][]*cell
+void DrawMatrix(GLFWwindow* Window, struct Cell Matrix[xDim][yDim])
 {
-    cell := make([][]*cell, xdim, xdim)
-    for ( x = 0; x < xdim; x++)
+    
+    //Grundfarbe des Hintergrnundes 
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    GlCheckError("glClearColor");
+    glClear(GL_COLOR_BUFFER_BIT);
+    GlCheckError("glClear");
+
+    //Viereck zeichnen aus 2 Dreiecken
+    for (int x = 0; x < xDim; x++)
     {
-        for ( y = 0; y < ydim; y++)
+        for (int y = 0; y < yDim; y++)
         {
-            c:= newCell(x,y)
-            cells[x] = append(cells[x], c)
+            if((Matrix[x][y].Alive) == true)
+            {
+                glDrawArrays(GL_TRIANGLES, 6 * (x * yDim + y), 6); //mode, first, count
+                GlCheckError("glDrawArrays");
+            }
+            
         }
         
     }
-    return cells
-
-}*/
-
-
-void DrawMatrix(GLFWwindow* window, float* square)
-{
     
-    //Grundfarbe des Hintergrundes 
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-    gl_check_error("glClearColor");
-    glClear(GL_COLOR_BUFFER_BIT);
-    gl_check_error("glClear");
-
-    //Viereck zeichnen aus 2 Dreiecken
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    gl_check_error("glDrawArrays");
-
-    //Zellen als Matrix aus Vierecken
 
  
 }

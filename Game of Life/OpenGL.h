@@ -5,30 +5,36 @@
 
 
 //definiere Matrix Größe
-#define xdim 10
-#define ydim 10
+#define xDim 100
+#define yDim 100
 
+struct Cell
+{
+    float Drawable[18]; //enthält die Vao-Daten
+    bool Alive;
+    bool NextRound;
+};
 
 //Vektoren zum Zeichnen
 typedef struct
 {
-    GLint width;
-    GLint height;
+    GLint Width;
+    GLint Height;
     GLuint ShaderProgram;
-    GLuint vao;
-    GLuint vbo;
-} user_data_t;
+    GLuint Vao;
+    GLuint Vbo;
+} UserData_t;
 
-typedef float square[18];
 
 //Fehlererkennung
-void gl_check_error(const char* error_text);
+void GlCheckError(const char* error_text);
 
 
 //Funktionen der OpenGL.c
-void InitShader(user_data_t* user_data);
-void InitVao(user_data_t* user_data, float* square);
-void InitOpenGL(GLFWwindow* window, float* square);
-void DrawMatrix(GLFWwindow* window, float square[]);
+void InitShader(UserData_t* UserData);
+void MakeVao(UserData_t* UserData, struct Cell Matrix[xDim][yDim]);
+void InitVao(UserData_t* UserData, float* Square);
+void InitOpenGL(GLFWwindow* Window, struct Cell Matrix[xDim][yDim]);
+void DrawMatrix(GLFWwindow* Window, struct Cell Matrix[xDim][yDim]);
 
 #endif

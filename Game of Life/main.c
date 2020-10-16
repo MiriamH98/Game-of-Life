@@ -6,404 +6,395 @@
 #include <string.h>
 
 
-struct cell
-{ //int x,y
-    uint32_t drawable;
-    bool alive;
-    bool nextround;
-    int size;
-    int grid;
-};
-
-//typedef die Matrix um Pointer casten zu können
-//typedef int Array2D[xdim][ydim];
-
-void error_callback(int error, const char* description)
+float Square[18] =
 {
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-} 
-
-//8 Funktionen, die den Wert der der Himmelsrichtung entsprechenden Nachbarn zurück gibt
-//fängt Edge-Cases ab und gibt Wert anderen Seite zurück
-bool Nof(int x, int y, struct cell Matrix[xdim][ydim], bool topedge)
-{
-    if (topedge==false)
-    {
-        bool result = Matrix[x][y+1].alive;
-        return result;
-    }
-    else
-    {
-        bool result = Matrix[x][0].alive;
-        return result;
-    }
-}
-bool Wof(int x, int y, struct cell Matrix[xdim][ydim], bool leftedge)
-{
-    if (leftedge==false)
-    {
-        bool result = Matrix[x-1][y].alive;
-        return result;
-    }
-    else
-    {
-        bool result = Matrix[xdim-1][y].alive;
-        return result;
-    }
-}
-bool Sof(int x, int y, struct cell Matrix[xdim][ydim], bool bottomedge)
-{
-    if (bottomedge==false)
-    {
-        bool result = Matrix[x][y-1].alive;
-        return result;
-    }
-    else
-    {
-        bool result = Matrix[x][ydim-1].alive;
-        return result;
-    }
-}
-bool Eof(int x, int y, struct cell Matrix[xdim][ydim], bool rightedge)
-{
-    if (rightedge==false)
-    {
-        bool result = Matrix[x+1][y].alive;
-        return result;
-    }
-    else
-    {
-        bool result = Matrix[0][y].alive;
-        return result;
-    }
-}
-bool NWof(int x, int y, struct cell Matrix[xdim][ydim], bool topedge, bool leftedge)
-{
-    if (topedge==false)
-    {
-        if (leftedge==false)
-        {
-            bool result = Matrix[x-1][y+1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[xdim-1][y+1].alive;
-        return result;
-        }
-    }
-    else
-    {
-        if (leftedge==false)
-        {
-            bool result = Matrix[x-1][0].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[xdim-1][0].alive;
-            return result;
-        }
-    }
-}
-bool NEof(int x, int y, struct cell Matrix[xdim][ydim], bool topedge, bool rightedge)
-{
-    if (topedge==false)
-    {
-        if (rightedge==false)
-        {
-            bool result = Matrix[x+1][y+1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[0][y+1].alive;
-            return result;
-        }
-    }
-    else
-    {
-        if (rightedge==false)
-        {
-            bool result = Matrix[x+1][0].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[0][0].alive;
-            return result;
-        }
-    }
-}
-bool SWof(int x, int y, struct cell Matrix[xdim][ydim], bool bottomedge, bool leftedge)
-{
-    if (bottomedge==false)
-    {
-        if (leftedge==false)
-        {
-            bool result = Matrix[x-1][y-1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[xdim-1][y-1].alive;
-            return result;
-        }
-    }
-    else
-    {
-        if (leftedge==false)
-        {
-            bool result = Matrix[x-1][ydim-1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[xdim-1][ydim-1].alive;
-            return result;
-        }
-    }
-}
-bool SEof(int x, int y, struct cell Matrix[xdim][ydim], bool bottomedge, bool rightedge)
-{
-    if (bottomedge==false)
-    {
-        if (rightedge==false)
-        {
-            bool result = Matrix[x+1][y-1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[0][y-1].alive;
-            return result;
-        }
-    }
-    else
-    {
-        if (rightedge==false)
-        {
-            bool result = Matrix[x+1][ydim-1].alive;
-            return result;
-        }
-        else
-        {
-            bool result = Matrix[0][ydim-1].alive;
-            return result;
-        }
-    }
-}
-/*
-float square[]=
-{
-    0.0f, 1.0f 0.0f,  //NW
+    0.0f, 1.0f, 0.0f,   //NW
     0.0f, 0.0f, 0.0f,   //SW
     1.0f, 0.0f, 0.0f,   //SO
 
     0.0f,  1.0f, 0.0f,  //NW
     1.0f,  1.0f, 0.0f,  //NO
-    1.0f, 0.0f, 0.0f,   //SO
+    1.0f,  0.0f, 0.0f,  //SO
 };
-    for i := 0; i < len(points); i++ {
-        var position float32
-        var size float32
-        switch i % 3 {
-        case 0:
-                //size = 1.0 / float32(columns)
-                position = float32(x) * size
-        case 1:
-                //size = 1.0 / float32(rows)
-                position = float32(y) * size
-        default:
-                continue
-        }
+//typedef die Matrix um Pointer casten zu können
+//typedef int Array2D[xDim][yDim];
 
-        if points[i] < 0 {
-                points[i] = (position * 2) - 1
-        } else {
-                points[i] = ((position + size) * 2) - 1
+void ErrorCallback(int Error, const char* Description)
+{
+    fprintf(stderr, "Error: %s\n", Description);
+}
+
+void framebuffer_size_callback(GLFWwindow* Window, int Width, int Height)
+{
+    glViewport(0, 0, Width, Height);
+}
+
+void FillDrawable(float Drawable[18])
+{
+    for (int i = 0; i < 18; i++)
+    {
+        Drawable[i] = 0.0f;
+    }
+    
+}
+//8 Funktionen, die den Wert der der Himmelsrichtung entsprechenden Nachbarn zurück gibt
+//fängt Edge-Cases ab und gibt Wert anderen Seite zurück
+bool Nof(int x, int y, struct Cell Matrix[xDim][yDim], bool TopEdge)
+{
+    if (TopEdge==false)
+    {
+        bool Result = Matrix[x][y+1].Alive;
+        return Result;
+    }
+    else
+    {
+        bool Result = Matrix[x][0].Alive;
+        return Result;
+    }
+}
+bool Wof(int x, int y, struct Cell Matrix[xDim][yDim], bool LeftEdge)
+{
+    if (LeftEdge==false)
+    {
+        bool Result = Matrix[x-1][y].Alive;
+        return Result;
+    }
+    else
+    {
+        bool Result = Matrix[xDim-1][y].Alive;
+        return Result;
+    }
+}
+bool Sof(int x, int y, struct Cell Matrix[xDim][yDim], bool BottomEdge)
+{
+    if (BottomEdge==false)
+    {
+        bool Result = Matrix[x][y-1].Alive;
+        return Result;
+    }
+    else
+    {
+        bool Result = Matrix[x][yDim-1].Alive;
+        return Result;
+    }
+}
+bool Eof(int x, int y, struct Cell Matrix[xDim][yDim], bool RightEdge)
+{
+    if (RightEdge==false)
+    {
+        bool Result = Matrix[x+1][y].Alive;
+        return Result;
+    }
+    else
+    {
+        bool Result = Matrix[0][y].Alive;
+        return Result;
+    }
+}
+bool NWof(int x, int y, struct Cell Matrix[xDim][yDim], bool TopEdge, bool LeftEdge)
+{
+    if (TopEdge==false)
+    {
+        if (LeftEdge==false)
+        {
+            bool Result = Matrix[x-1][y+1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[xDim-1][y+1].Alive;
+        return Result;
         }
     }
-*/
-void CalcSquareCoord(user_data_t* user_data, float points[18], int x, int y)
+    else
+    {
+        if (LeftEdge==false)
+        {
+            bool Result = Matrix[x-1][0].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[xDim-1][0].Alive;
+            return Result;
+        }
+    }
+}
+bool NEof(int x, int y, struct Cell Matrix[xDim][yDim], bool TopEdge, bool RightEdge)
 {
-    float position = 0.0f;
-    float sizex = 2.0f / (float)xdim; 
-    float sizey = 2.0f / (float)ydim; 
-    points[] = square[];
- for (int i = 0; i < 18; i++)
- {
-        //0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16
+    if (TopEdge==false)
+    {
+        if (RightEdge==false)
+        {
+            bool Result = Matrix[x+1][y+1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[0][y+1].Alive;
+            return Result;
+        }
+    }
+    else
+    {
+        if (RightEdge==false)
+        {
+            bool Result = Matrix[x+1][0].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[0][0].Alive;
+            return Result;
+        }
+    }
+}
+bool SWof(int x, int y, struct Cell Matrix[xDim][yDim], bool BottomEdge, bool LeftEdge)
+{
+    if (BottomEdge==false)
+    {
+        if (LeftEdge==false)
+        {
+            bool Result = Matrix[x-1][y-1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[xDim-1][y-1].Alive;
+            return Result;
+        }
+    }
+    else
+    {
+        if (LeftEdge==false)
+        {
+            bool Result = Matrix[x-1][yDim-1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[xDim-1][yDim-1].Alive;
+            return Result;
+        }
+    }
+}
+bool SEof(int x, int y, struct Cell Matrix[xDim][yDim], bool BottomEdge, bool RightEdge)
+{
+    if (BottomEdge==false)
+    {
+        if (RightEdge==false)
+        {
+            bool Result = Matrix[x+1][y-1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[0][y-1].Alive;
+            return Result;
+        }
+    }
+    else
+    {
+        if (RightEdge==false)
+        {
+            bool Result = Matrix[x+1][yDim-1].Alive;
+            return Result;
+        }
+        else
+        {
+            bool Result = Matrix[0][yDim-1].Alive;
+            return Result;
+        }
+    }
+}
+//Funktion zur Berechnung der Quadrat-Koordinaten  
+void CalcSquareCoord(float Points[18], int x, int y)
+{
+    float Position = 0.0f;
+    float SizeX = 2.0f / (float)xDim; 
+    float SizeY = 2.0f / (float)yDim; 
+    
+      
+    
+ for (int i = 0; i < 18; i++)//Schleife durch points
+ {  
+     
     switch(i % 3)
     {
-        case 0:
+        case 0: //case ändert X-Koordinate
                 
-            position = (float)(x) * sizex;
-            if(points[i] > 0)
+            Position = (float)(x) * SizeX;
+            if(Square[i] > 0)
             {
-                points[i] = (position + sizex) - 1;//1
+                Points[i] = (Position + SizeX) - 1; //ändert in 1.0 
             }
             else
             {
-                points[i] = position - 1;//0
+                Points[i] = Position - 1; //ändert in 0.0
             }
+           
             break;
 
-        case 1:
+        case 1: //case ändert Y-Koordinate
                 
-            position = (float)(y) * sizey;
-            if(points[i] > 0)
+            Position = (float)(y) * SizeY;
+            if(Square[i] > 0)
             {
-                points[i] = (position + sizey) - 1;//1
+                Points[i] = (Position + SizeY) - 1; //ändert in 1.0
             }
             else
             {
-                points[i] = position - 1;//0
+                Points[i] = Position - 1; //ändert in 0.0
             }
+            
             break;
             
-        default:
+        default: //case behält Z-Koordinate bei
         
             break;
     }
  }
 }
+//Funktion zur Berechnung der Nachbarn und so Implementierung der Game of Life Regeln
+void IterateCells(struct Cell LifeMatrix[xDim][yDim])
+{
+    //Randfelder theoretisch ohne Nachbarn
+    bool LeftEdge = false;
+    bool RightEdge = false;
+    bool TopEdge = false;
+    bool BottomEdge = false;
+    short EdgeSum = 0;
 
+
+
+    //iteriere von der ersten Ge erationauf die anächste
+    for(int x = 0; x < xDim; x++)
+    {
+        if(x==0)
+            {LeftEdge = true;}
+        else
+            {LeftEdge = false;}
+
+        if(x==xDim-1)
+            {RightEdge = true;}
+        else
+            {RightEdge = false;}
+        
+
+        for(int y = 0; y < yDim; y++)
+        {
+            if(y==0)
+                {BottomEdge = true;}
+            else
+                {BottomEdge = false;}
+
+            if(y==yDim-1)
+                {TopEdge = true;}
+            else
+                {TopEdge = false;}
+            
+            EdgeSum = 0;
+            EdgeSum += Nof(x, y, LifeMatrix, TopEdge);
+            EdgeSum += Sof(x, y, LifeMatrix, BottomEdge);
+            EdgeSum += Wof(x, y, LifeMatrix, LeftEdge);
+            EdgeSum += Eof(x, y, LifeMatrix, RightEdge);
+            EdgeSum += NEof(x, y, LifeMatrix, TopEdge, RightEdge);
+            EdgeSum += SEof(x, y, LifeMatrix, BottomEdge, RightEdge);
+            EdgeSum += SWof(x, y, LifeMatrix, BottomEdge, LeftEdge);
+            EdgeSum += NWof(x, y, LifeMatrix, TopEdge, LeftEdge);
+            
+            if((LifeMatrix[x][y].Alive == true && EdgeSum == 2)||EdgeSum == 3)//3 nachbarn oder 2 und am leben
+            {
+                LifeMatrix[x][y].NextRound = true;
+            }
+            else
+            {
+                LifeMatrix[x][y].NextRound = false;
+            }
+
+            
+            
+        }
+                
+    } 
+    for(int x = 0; x < xDim; x++)
+    {
+        for(int y = 0; y < yDim; y++)
+        {
+            LifeMatrix[x][y].Alive = LifeMatrix[x][y].NextRound;
+        }        
+    }
+}
 
 int main()
 {
 
     //2 Matrizen zum gegenseitigen Überschreiben und beibehalten der alten Werte für bestimmte Zeit
     srand(time(NULL));
-    struct cell LifeMatrix[xdim][ydim];
-     for(int x = 0; x < xdim; x++)
+    struct Cell LifeMatrix[xDim][yDim];
+
+    for(int x = 0; x < xDim; x++)
     {
-        for(int y = 0; y < ydim; y++)
+        for(int y = 0; y < yDim; y++)
         {
-            LifeMatrix[x][y].alive = rand() % 2;
+            FillDrawable(LifeMatrix[x][y].Drawable);
+            LifeMatrix[x][y].Alive = rand() % 2;
+            CalcSquareCoord(LifeMatrix[x][y].Drawable, x, y);
         }
     }   
-
-    //Randfelder theoretisch ohne Nachbarn
-    bool leftedge = false;
-    bool rightedge = false;
-    bool topedge = false;
-    bool bottomedge = false;
-    short edgesum = 0;
-
-
-
-//iteriere von der einen Matrix auf die andere
-
-    for(int x = 0; x < xdim; x++)
-    {
-        if(x==0)
-            {leftedge = true;}
-        else
-            {leftedge = false;}
-
-        if(x==xdim-1)
-            {rightedge = true;}
-        else
-            {rightedge = false;}
-        
-
-        for(int y = 0; y < ydim; y++)
-        {
-            if(y==0)
-                {bottomedge = true;}
-            else
-                {bottomedge = false;}
-
-            if(y==ydim-1)
-                {topedge = true;}
-            else
-                {topedge = false;}
-            
-            edgesum = 0;
-            edgesum += Nof(x, y, LifeMatrix, topedge);
-            edgesum += Sof(x, y, LifeMatrix, bottomedge);
-            edgesum += Wof(x, y, LifeMatrix, leftedge);
-            edgesum += Eof(x, y, LifeMatrix, rightedge);
-            edgesum += NEof(x, y, LifeMatrix, topedge, rightedge);
-            edgesum += SEof(x, y, LifeMatrix, bottomedge, rightedge);
-            edgesum += SWof(x, y, LifeMatrix, bottomedge, leftedge);
-            edgesum += NWof(x, y, LifeMatrix, topedge, leftedge);
-            
-            if((LifeMatrix[x][y].alive == true && edgesum == 2)||edgesum == 3)//3 nachbarn oder 2 und am leben
-            {
-                LifeMatrix[x][y].nextround = 1;
-            }
-            else
-            {
-                LifeMatrix[x][y].nextround = 0;
-            }
-            
-        }
-                
-    } 
+ 
 
 
     //Quelle: https://www.glfw.org/documentation.html#example-code, Code Treumer/Lorenz
-    //Create window
-    GLFWwindow* window;
-    user_data_t user_data =
+    //Erstellen des Fensters
+    GLFWwindow* Window;
+    UserData_t UserData =
     {
-        .width = 800,
-        .height = 800,
+        .Width = 800,
+        .Height = 800,
     };
 
-    //Initialize library
+    //Initialisieren der Bibliothek
     if(!glfwInit())
         printf("Failed to initialize GLFW");
 
-    //We want at least OpenGL 4.1:
+    //Setzen auf Version 4.1
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(ErrorCallback);
     
-    //Enable forward-compatibility and use the core profile
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    //Create a GLFW window
-    window = glfwCreateWindow(user_data.width, user_data.height, "Game of Life", NULL, NULL);
+    //Erstellen eines glfw Fenster
+    Window = glfwCreateWindow(UserData.Width, UserData.Height, "Game of Life", NULL, NULL);
     
-    glfwMakeContextCurrent(window);
-    // WICHTIG! Nötig für Speicherzugriff OpenGL!
+    glfwMakeContextCurrent(Window);
+    //Verhindern eines Speicherzugriffsfehler
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    glViewport(0, 0, user_data.width, user_data.height);
+    glViewport(0, 0, UserData.Width, UserData.Height);
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); 
-    glfwSetWindowUserPointer(window, &user_data);
-    
-    InitOpenGL(window, square);
+    glfwSetFramebufferSizeCallback(Window, framebuffer_size_callback); 
+    glfwSetWindowUserPointer(Window, &UserData);
+
+
+    InitOpenGL(Window, LifeMatrix);
     
 
-    while(!glfwWindowShouldClose(window))
-    {
-           
-      /*  
-       CalcSquareCoordinates(x, y);
-      */
-        DrawMatrix(window, square);
-        
-        
-        // Swap the buffers to avoid tearing:
-        glfwSwapBuffers(window);
+    while(!glfwWindowShouldClose(Window))
+    { 
+        DrawMatrix(Window, LifeMatrix);
+       // delay(3000);    
+        IterateCells(LifeMatrix);
+
+        glfwSwapBuffers(Window);
         glfwPollEvents();
     }
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(Window);
     glfwTerminate();
    
-   //glad_glAttachShader(GL_VERTEX_SHADER);
-   //glad_glAttachShader(GL_FRAGMENT_SHADER);
 
     return 0;
 }
+ 
