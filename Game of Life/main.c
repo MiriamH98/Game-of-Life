@@ -207,49 +207,51 @@ bool SEof(int x, int y, struct Cell Matrix[xDim][yDim], bool BottomEdge, bool Ri
         }
     }
 }
-//Funktion zur Berechnung der Quadrat-Koordinaten  
+//Funktion zur Berechnung der Quadrat-Koordinaten, schreibt diese Werte in Points[]
 void CalcSquareCoord(float Points[18], int x, int y)
 {
     float Position = 0.0f;
-    float SizeX = 2.0f / (float)xDim; 
-    float SizeY = 2.0f / (float)yDim; 
-    
-      
-    
- for (int i = 0; i < 18; i++)//Schleife durch points
+    float SizeX = 2.0f / (float)xDim; //Berechnet die horizontale Größe einer Zelle bei xDim Zellen
+    float SizeY = 2.0f / (float)yDim; //Berechnet die vertikale Größe einer Zelle bei yDim Zellen
+       
+ for (int i = 0; i < 18; i++)//Schleife durch Points
  {  
      
-    switch(i % 3)
+    switch(i % 3) //Unterscheidung zwischen X/Y/Z-Koordinaten
     {
-        case 0: //case ändert X-Koordinate
+        case 0: //Points[i] wird X-Koordinate beschreiben
                 
-            Position = (float)(x) * SizeX;
-            if(Square[i] > 0)
+            Position = (float)(x) * SizeX;//Minimalgröße des aktuellen X Wertes
+            
+            //Vergleicht mir Vorlage eines Quadrats, ob noch SizeX addiert werden muss um die rechte Seite des Quadrats zu erreichen
+            if(Square[i] > 0) 
             {
-                Points[i] = (Position + SizeX) - 1; //ändert in 1.0 
+                Points[i] = (Position + SizeX) - 1; 
             }
             else
             {
-                Points[i] = Position - 1; //ändert in 0.0
+                Points[i] = Position - 1; 
             }
            
             break;
 
-        case 1: //case ändert Y-Koordinate
+        case 1: //Points[i] wird Y-Koordinate beschreiben
                 
-            Position = (float)(y) * SizeY;
+            Position = (float)(y) * SizeY;//Minimalgröße des aktuellen Y Wertes
+            
+            //Vergleicht mir Vorlage eines Quadrats, ob noch SizeY addiert werden muss um die obere Seite des Quadrats zu erreichen
             if(Square[i] > 0)
             {
-                Points[i] = (Position + SizeY) - 1; //ändert in 1.0
+                Points[i] = (Position + SizeY) - 1;
             }
             else
             {
-                Points[i] = Position - 1; //ändert in 0.0
+                Points[i] = Position - 1;
             }
             
             break;
             
-        default: //case behält Z-Koordinate bei
+        default: //Points[i] wird Z-Koordinate beschreiben
         
             break;
     }
@@ -384,8 +386,7 @@ int main()
 
     while(!glfwWindowShouldClose(Window))
     { 
-        DrawMatrix(Window, LifeMatrix);
-       // delay(3000);    
+        DrawMatrix(Window, LifeMatrix);         
         IterateCells(LifeMatrix);
 
         glfwSwapBuffers(Window);
