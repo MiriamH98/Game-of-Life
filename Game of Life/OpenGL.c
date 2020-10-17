@@ -161,27 +161,23 @@ void InitShader(UserData_t* UserData)
     glDeleteShader(FragmentShader); 
 
     UserData->ShaderProgram = ShaderProgram;
-
-
-
 }
+
+//Abgeänderte InitVao, die die Dreieckskoordinaten in der Matrix ausliest und in den Buffer läd 
 void MakeVao(UserData_t* UserData, struct Cell Matrix[xDim][yDim])
 {
-    float Temp[18*xDim*yDim];
-    //Herauslesen von drawable Daten von Lifematrix
+	
+    float Temp[18*xDim*yDim];//Alle Daten müssen gleichzeitig in den Buffer geladen werden, weshalb sie beim rauslesen zwischengespeichert werden
+    
     for(int x = 0; x < xDim; x++)
     {
         for(int y = 0; y < yDim; y++)
         {
-            int k = 18 * (x * yDim + y);
-            
+            int k = 18 * (x * yDim + y);           
             for(int i = 0; i < 18; i++)
-            {
-                
-                Temp[k + i] = Matrix[x][y].Drawable[i];
-               
-            }
-            
+            {                
+                Temp[k + i] = Matrix[x][y].Drawable[i];//Herauslesen von drawable Daten von Lifematrix              
+            }            
         }
     }   
     //Anlegen und Binden eines Vertex Buffer Objektes
@@ -262,20 +258,20 @@ void InitOpenGL(GLFWwindow* Window, struct Cell Matrix[xDim][yDim])
 void DrawMatrix(GLFWwindow* Window, struct Cell Matrix[xDim][yDim])
 {
     
-    //Grundfarbe des Hintergrnundes 
+    //Grundfarbe des Hintergrundes 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     GlCheckError("glClearColor");
     glClear(GL_COLOR_BUFFER_BIT);
     GlCheckError("glClear");
 
-    //Viereck zeichnen aus 2 Dreiecken
+    //Für jede Zelle, zeichne die zugehörigen 2 Dreiecke aus den Buffer wenn die Zelle am Leben ist
     for (int x = 0; x < xDim; x++)
     {
         for (int y = 0; y < yDim; y++)
         {
             if((Matrix[x][y].Alive) == true)
             {
-                glDrawArrays(GL_TRIANGLES, 6 * (x * yDim + y), 6); //mode, first, count
+                glDrawArrays(GL_TRIANGLES, 6 * (x * yDim + y), 6); //findet die zugehörigen Dreiecke im Buffer und zeichnet beide
                 GlCheckError("glDrawArrays");
             }
             
