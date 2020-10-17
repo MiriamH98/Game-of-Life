@@ -263,7 +263,7 @@ void DrawMatrix(GLFWwindow* Window, struct Cell Matrix[xDim][yDim])
 {
     
     //Grundfarbe des Hintergrnundes 
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     GlCheckError("glClearColor");
     glClear(GL_COLOR_BUFFER_BIT);
     GlCheckError("glClear");

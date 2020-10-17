@@ -29,14 +29,6 @@ void framebuffer_size_callback(GLFWwindow* Window, int Width, int Height)
     glViewport(0, 0, Width, Height);
 }
 
-/*void FillDrawable(float Drawable[18])
-{
-    for (int i = 0; i < 18; i++)
-    {
-        Drawable[i] = 0.0f;
-    }
-    
-}*/
 //8 Funktionen, die den Wert der der Himmelsrichtung entsprechenden Nachbarn zurück gibt
 //fängt Edge-Cases ab und gibt Wert anderen Seite zurück
 bool Nof(int x, int y, struct Cell Matrix[xDim][yDim], bool TopEdge)
@@ -312,10 +304,7 @@ void IterateCells(struct Cell LifeMatrix[xDim][yDim])
             else
             {
                 LifeMatrix[x][y].NextRound = false;
-            }
-
-            
-            
+            } 
         }
                 
     } 
@@ -339,14 +328,11 @@ int main()
     {
         for(int y = 0; y < yDim; y++)
         {
-            //FillDrawable(LifeMatrix[x][y].Drawable);
             LifeMatrix[x][y].Alive = rand() % 2;
             CalcSquareCoord(LifeMatrix[x][y].Drawable, x, y);
         }
     }   
  
-
-
     //Quelle: https://www.glfw.org/documentation.html#example-code, Code Treumer/Lorenz
     //Erstellen des Fensters
     GLFWwindow* Window;
