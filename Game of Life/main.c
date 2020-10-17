@@ -13,7 +13,7 @@ void ErrorCallback(int Error, const char* Description)
     fprintf(stderr, "Error: %s\n", Description);
 }
 
-void framebuffer_size_callback(GLFWwindow* Window, int Width, int Height)
+void FramebufferSizeCallback(GLFWwindow* Window, int Width, int Height)
 {
     glViewport(0, 0, Width, Height);
 }
@@ -362,7 +362,7 @@ int main()
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glViewport(0, 0, UserData.Width, UserData.Height);
 
-    glfwSetFramebufferSizeCallback(Window, framebuffer_size_callback); 
+    glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback); 
     glfwSetWindowUserPointer(Window, &UserData);
 
 
