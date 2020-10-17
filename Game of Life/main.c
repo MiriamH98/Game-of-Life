@@ -6,18 +6,7 @@
 #include <string.h>
 
 
-float Square[18] =
-{
-    0.0f, 1.0f, 0.0f,   //NW
-    0.0f, 0.0f, 0.0f,   //SW
-    1.0f, 0.0f, 0.0f,   //SO
 
-    0.0f,  1.0f, 0.0f,  //NW
-    1.0f,  1.0f, 0.0f,  //NO
-    1.0f,  0.0f, 0.0f,  //SO
-};
-//typedef die Matrix um Pointer casten zu können
-//typedef int Array2D[xDim][yDim];
 
 void ErrorCallback(int Error, const char* Description)
 {
@@ -199,9 +188,20 @@ bool SEof(int x, int y, struct Cell Matrix[xDim][yDim], bool BottomEdge, bool Ri
         }
     }
 }
-//Funktion zur Berechnung der Quadrat-Koordinaten, schreibt diese Werte in Points[]
+//Funktion zur Berechnung der Quadrat-Koordinaten, schreibt diese Ergebnisse in Points[]
 void CalcSquareCoord(float Points[18], int x, int y)
 {
+    //Array aus Floats was 2 Dreiecke beschreibt die sich zu einem Viereck zusammenfügen
+    float Square[18] =
+    {
+        0.0f, 1.0f, 0.0f,   //NW
+        0.0f, 0.0f, 0.0f,   //SW
+        1.0f, 0.0f, 0.0f,   //SO
+
+        0.0f,  1.0f, 0.0f,  //NW
+        1.0f,  1.0f, 0.0f,  //NO
+        1.0f,  0.0f, 0.0f,  //SO
+    };
     float Position = 0.0f;
     float SizeX = 2.0f / (float)xDim; //Berechnet die horizontale Größe einer Zelle bei xDim Zellen
     float SizeY = 2.0f / (float)yDim; //Berechnet die vertikale Größe einer Zelle bei yDim Zellen
@@ -215,7 +215,7 @@ void CalcSquareCoord(float Points[18], int x, int y)
                 
             Position = (float)(x) * SizeX;//Minimalgröße des aktuellen X Wertes
             
-            //Vergleicht mir Vorlage eines Quadrats, ob noch SizeX addiert werden muss um die rechte Seite des Quadrats zu erreichen
+            //Vergleicht mir Vorlage (Square[]), ob noch SizeX addiert werden muss um die rechte Seite des Quadrats zu erreichen
             if(Square[i] > 0) 
             {
                 Points[i] = (Position + SizeX) - 1; 
@@ -231,7 +231,7 @@ void CalcSquareCoord(float Points[18], int x, int y)
                 
             Position = (float)(y) * SizeY;//Minimalgröße des aktuellen Y Wertes
             
-            //Vergleicht mir Vorlage eines Quadrats, ob noch SizeY addiert werden muss um die obere Seite des Quadrats zu erreichen
+            //Vergleicht mir Vorlage (Square[]), ob noch SizeY addiert werden muss um die obere Seite des Quadrats zu erreichen
             if(Square[i] > 0)
             {
                 Points[i] = (Position + SizeY) - 1;
@@ -249,7 +249,7 @@ void CalcSquareCoord(float Points[18], int x, int y)
     }
  }
 }
-//Funktion zur Berechnung der Nachbarn und so Implementierung der Game of Life Regeln
+//Funktion zur Berechnung der nächsten Generation von lebenden Zellen und so Implementierung der Game of Life Regeln
 void IterateCells(struct Cell LifeMatrix[xDim][yDim])
 {
     //Randfelder theoretisch ohne Nachbarn
@@ -257,11 +257,10 @@ void IterateCells(struct Cell LifeMatrix[xDim][yDim])
     bool RightEdge = false;
     bool TopEdge = false;
     bool BottomEdge = false;
+    
     short EdgeSum = 0;
-
-
-
-    //iteriere von der ersten Ge erationauf die anächste
+    
+    //iteriere von der ersten Generation auf die Nächste
     for(int x = 0; x < xDim; x++)
     {
         if(x==0)
@@ -297,9 +296,9 @@ void IterateCells(struct Cell LifeMatrix[xDim][yDim])
             EdgeSum += SWof(x, y, LifeMatrix, BottomEdge, LeftEdge);
             EdgeSum += NWof(x, y, LifeMatrix, TopEdge, LeftEdge);
             
-            if((LifeMatrix[x][y].Alive == true && EdgeSum == 2)||EdgeSum == 3)//3 nachbarn oder 2 und am leben
+            if((LifeMatrix[x][y].Alive == true && EdgeSum == 2)||EdgeSum == 3)//3 Nachbarn oder 2 Nachbarn und Zelle am Leben bedeutet das die Zelle nächste Generation lebt
             {
-                LifeMatrix[x][y].NextRound = true;
+                LifeMatrix[x][y].NextRound = true;//Ob die Zelle lebt wird zwischengespeichert, da .Alive noch zur Berrechnung der benachbarten Zellen gebraucht wird
             }
             else
             {
@@ -312,7 +311,7 @@ void IterateCells(struct Cell LifeMatrix[xDim][yDim])
     {
         for(int y = 0; y < yDim; y++)
         {
-            LifeMatrix[x][y].Alive = LifeMatrix[x][y].NextRound;
+            LifeMatrix[x][y].Alive = LifeMatrix[x][y].NextRound;//Alle neuen Werte wurden berechnet, jetzt können sie in .Alive geschrieben werden
         }        
     }
 }
@@ -320,16 +319,16 @@ void IterateCells(struct Cell LifeMatrix[xDim][yDim])
 int main()
 {
 
-    //2 Matrizen zum gegenseitigen Überschreiben und beibehalten der alten Werte für bestimmte Zeit
-    srand(time(NULL));
-    struct Cell LifeMatrix[xDim][yDim];
+    
+    srand(time(NULL));//Initializieren des rand() Befehl
+    struct Cell LifeMatrix[xDim][yDim];//Anlegen der Matrix die alle Zellen beinhaltet
 
     for(int x = 0; x < xDim; x++)
     {
         for(int y = 0; y < yDim; y++)
-        {
-            LifeMatrix[x][y].Alive = rand() % 2;
-            CalcSquareCoord(LifeMatrix[x][y].Drawable, x, y);
+        {   
+            LifeMatrix[x][y].Alive = rand() % 2;//füllen der Matrix mit zufälligen Anfangszuständen
+            CalcSquareCoord(LifeMatrix[x][y].Drawable, x, y);//füllen der Zellen mit ihren Dreieckskoordinaten
         }
     }   
  
@@ -367,13 +366,13 @@ int main()
     glfwSetWindowUserPointer(Window, &UserData);
 
 
-    InitOpenGL(Window, LifeMatrix);
+    InitOpenGL(Window, LifeMatrix);//Läd die Dreieckskoordinaten aller Zellen in den Buffer
     
 
     while(!glfwWindowShouldClose(Window))
     { 
-        DrawMatrix(Window, LifeMatrix);         
-        IterateCells(LifeMatrix);
+        DrawMatrix(Window, LifeMatrix);//Zeichnet für jede Zelle, die am Leben ist, die zugehörigen Dreiecke im Buffer         
+        IterateCells(LifeMatrix);//Berechnet die nächste Generation an lebenden Zellen
 
         glfwSwapBuffers(Window);
         glfwPollEvents();
